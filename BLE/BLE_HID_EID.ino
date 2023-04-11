@@ -14,9 +14,6 @@ boolean newData = false;
 #define RXD2 16
 #define TXD2 17
 
-
-
-
 void setup() {
   //Setup Serial Ports
   Serial.begin(115200);
@@ -26,7 +23,6 @@ void setup() {
   //Setup BleKeyboard
   bleKeyboard.begin(); //Bluetooth device name
   Serial.println("The device started, now you can pair it with bluetooth!");
-
 }
 
 void loop() {
@@ -41,43 +37,44 @@ void recvWithEndMarker() {
  char rc;
  
  // 
-           while (Serial2.available() > 0 && newData == false) {
- rc = Serial2.read();
+    while (Serial2.available() > 0 && newData == false) {
+      rc = Serial2.read();
 
- if (rc != endMarker) {
- receivedChars[ndx] = rc;
- ndx++;
- if (ndx >= numChars) {
- ndx = numChars - 1;
- }
- }
- else {
- receivedChars[ndx] = '\0'; // terminate the string
- ndx = 0;
- newData = true;
- }
- }
+      if (rc != endMarker) {
+        receivedChars[ndx] = rc;
+        ndx++;
+          if (ndx >= numChars) {
+          ndx = numChars - 1;
+      }
+    }
+    else {
+      receivedChars[ndx] = '\0'; // terminate the string
+      ndx = 0;
+      newData = true;
+    }
+  }
 }
 
 //Send to Serial & BleKeyboard
 void showNewData() {
-//country Code  
   if (newData == true) {
-    receivedChars[3] = 0;
     Serial.print("EID Tag Read ... ");
-    Serial.print(receivedChars);
-    bleKeyboard.print(receivedChars);
+    Serial.println(receivedChars);
+//Country Code
+  for (byte i = 0; i < 3; i++) {
+    bleKeyboard.print(receivedChars[i]);
+    delay(5);
+  }
+  bleKeyboard.print(" ");
+  delay(5);
 //Rest of tag
   for (byte i = 4; i < 16; i++) {
-    Serial.print(receivedChars[i]);
     bleKeyboard.print(receivedChars[i]);
+    delay(5);
   }
 //Send Return Key  
-  Serial.println("");
-  bleKeyboard.write(KEY_RETURN);
-  delay(1000);
-
- newData = false;
+    bleKeyboard.write(KEY_RETURN);
+    delay(100);
  }
+ newData = false;
 }
-
